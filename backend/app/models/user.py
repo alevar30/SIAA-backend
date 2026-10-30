@@ -1,5 +1,6 @@
 from typing import List, Optional
-from sqlalchemy import String, Boolean, Integer, BigInteger, ForeignKey
+from datetime import datetime
+from sqlalchemy import String, Boolean, Integer, BigInteger, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
@@ -36,9 +37,13 @@ class User(Base):
     # Aquí se guarda el HASH, nunca la contraseña en texto plano
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     activo: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Al crear con contraseña genérica, se obliga al primer cambio
+    debe_cambiar_contrasena: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    fecha_creacion: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    fecha_ultimo_cambio: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     # Relaciones
     rol: Mapped["Role"] = relationship("Role", back_populates="usuarios")
     # Se dejan sin back_populates para no modificar profiles.py en este paso.
-    estudiante: Mapped[Optional["Student"]] = relationship("Student")
-    docente: Mapped[Optional["Teacher"]] = relationship("Teacher")
+    estudiante: Mapped[Optional["Student"]] = relationship("Student", uselist=False)
+    docente: Mapped[Optional["Teacher"]] = relationship("Teacher", uselist=False)
