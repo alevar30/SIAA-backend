@@ -15,12 +15,12 @@ class Student(Base):
     id_usuario: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("usuarios.id_usuario"), unique=True, nullable=False
     )
-    id_carrera: Mapped[int] = mapped_column(Integer, ForeignKey("carreras.id_carrera"), nullable=False)
+    id_carrera: Mapped[int | None] = mapped_column(Integer, ForeignKey("carreras.id_carrera"), nullable=True)
     matricula: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
     semestre: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True)
 
     usuario: Mapped["User"] = relationship("User", back_populates="estudiante")
-    carrera: Mapped["Career"] = relationship("Career", back_populates="estudiantes")
+    carrera: Mapped[Optional["Career"]] = relationship("Career", back_populates="estudiantes")
 
 
 class Teacher(Base):

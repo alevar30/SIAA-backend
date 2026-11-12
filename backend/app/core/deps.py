@@ -44,6 +44,8 @@ async def get_current_user(
 
 async def get_ready_user(current_user: User = Depends(get_current_user)) -> User:
     """Usar en todas las futuras rutas de negocio; /me y cambio permiten acceso limitado."""
+    if current_user.requiere_completar_perfil:
+        raise HTTPException(status_code=403, detail="Debes completar tu perfil antes de continuar")
     if current_user.debe_cambiar_contrasena:
         raise HTTPException(status_code=403, detail="Debes cambiar tu contraseña antes de continuar")
     return current_user

@@ -14,13 +14,7 @@ from app.repositories.admin_repository import AdminRepository
 from app.repositories.auth_repository import AuthRepository
 from conftest import PASSWORD
 
-STUDENT = {
-    "nombre": "Nueva Estudiante",
-    "correo": "new@example.com",
-    "matricula": "20260002",
-    "id_carrera": 1,
-    "semestre": 2,
-}
+STUDENT = {"matricula": "20260002"}
 TEACHER = {
     "nombre": "Nuevo Docente",
     "correo": "newteacher@example.com",
@@ -44,7 +38,6 @@ async def headers(client, identifier="admin@example.com"):
     "identifier,role",
     [
         ("admin@example.com", "administrador"),
-        ("student@example.com", "estudiante"),
         ("20260001", "estudiante"),
         ("EMP001", "docente"),
         ("ADMIN@EXAMPLE.COM", "administrador"),
@@ -62,6 +55,7 @@ async def test_login_identifiers(client, identifier, role):
     "identifier,password",
     [
         ("absent@example.com", PASSWORD),
+        ("student@example.com", PASSWORD),
         ("admin@example.com", "incorrecta"),
     ],
 )
@@ -192,11 +186,11 @@ async def test_optimistic_password_update_rejects_stale_session(database, passwo
     async with database() as first, database() as second:
         user1 = await AuthRepository.get_by_id(first, 1)
         user2 = await AuthRepository.get_by_id(second, 1)
-        version = user2.token_version
         # Cerrar la lectura permite escribir en SQLite y mantiene el objeto obsoleto.
         await second.commit()
-        assert await AuthRepository.update_password(first, user1, password_hash, version)
-        assert not await AuthRepository.update_password(second, user2, password_hash, version)
+        assert await AuthRepository.update_password(first, user1, password_hash)
+        await first.commit()
+        assert not await AuthRepository.update_password(second, user2, password_hash)
 
 
 @pytest.mark.parametrize(
@@ -211,7 +205,7 @@ async def test_create_user_random_password_and_profile(client, database, route, 
     assert response.status_code == 201, response.text
     body = response.json()
     temporary = body["password_temporal"]
-    assert len(temporary) >= 24 and temporary != "SIAA-" + identifier
+    assert len(temporary) == (8 if route == "estudiantes" else 24)
     assert "password_generica" not in body
     assert response.headers["cache-control"] == "no-store"
     async with database() as db:
@@ -224,8 +218,8 @@ async def test_create_user_random_password_and_profile(client, database, route, 
 
 
 async def test_duplicate_email_case_insensitive(client):
-    payload = {**STUDENT, "correo": "ADMIN@EXAMPLE.COM"}
-    response = await client.post("/api/v1/admin/estudiantes", json=payload, headers=await headers(client))
+    payload = {**TEACHER, "correo": "ADMIN@EXAMPLE.COM"}
+    response = await client.post("/api/v1/admin/docentes", json=payload, headers=await headers(client))
     assert response.status_code == 409
 
 
@@ -233,7 +227,9 @@ async def test_duplicate_email_case_insensitive(client):
     "route,payload",
     [
         ("estudiantes", {**STUDENT, "matricula": "20260001"}),
+        ("estudiantes", {**STUDENT, "matricula": "EMP001"}),
         ("docentes", {**TEACHER, "numero_empleado": "EMP001"}),
+        ("docentes", {**TEACHER, "numero_empleado": "20260001"}),
     ],
 )
 async def test_duplicate_identifier(client, route, payload):
@@ -243,17 +239,32 @@ async def test_duplicate_identifier(client, route, payload):
 
 
 async def test_missing_and_inactive_career(client, database):
-    auth = await headers(client)
-    response = await client.post(
-        "/api/v1/admin/estudiantes", headers=auth, json={**STUDENT, "id_carrera": 999}
-    )
-    assert response.status_code == 404
     async with database() as db:
         await db.execute(update(Career).values(activo=False))
         await db.commit()
-    assert (await client.post("/api/v1/admin/estudiantes", headers=auth, json=STUDENT)).status_code == 409
-    async with database() as db:
-        assert await db.scalar(select(func.count()).select_from(User)) == 3
+    created = await client.post("/api/v1/admin/estudiantes", headers=await headers(client), json=STUDENT)
+    assert created.status_code == 201
+    temp = created.json()["password_temporal"]
+    session = await login(client, STUDENT["matricula"], temp)
+    auth = {"Authorization": "Bearer " + session.json()["access_token"]}
+    assert (await client.get("/api/v1/auth/primer-acceso/carreras", headers=auth)).json() == []
+    for career in (1, 999):
+        response = await client.post(
+            "/api/v1/auth/primer-acceso",
+            headers=auth,
+            json={
+                "id_carrera": career,
+                "nombre": "Ana",
+                "apellidos": "Pérez",
+                "password_actual": temp,
+                "password_nueva": NEW_PASSWORD,
+                "password_nueva_confirm": NEW_PASSWORD,
+            },
+        )
+        assert response.status_code == 409
+    me = await client.get("/api/v1/auth/me", headers=auth)
+    assert me.json()["requiere_completar_perfil"] is True
+    assert (await login(client, STUDENT["matricula"], temp)).status_code == 200
 
 
 async def test_database_conflict_rolls_back_orphan_user(client, database, monkeypatch):
@@ -265,15 +276,14 @@ async def test_database_conflict_rolls_back_orphan_user(client, database, monkey
     assert response.status_code == 409
     async with database() as db:
         assert await db.scalar(select(func.count()).select_from(User)) == 3
-        assert await db.scalar(select(User).where(User.correo == STUDENT["correo"])) is None
 
 
 async def test_database_email_index_handles_race(client, database, monkeypatch):
     monkeypatch.setattr(AdminRepository, "get_user_by_correo", AsyncMock(return_value=None))
     response = await client.post(
-        "/api/v1/admin/estudiantes",
+        "/api/v1/admin/docentes",
         headers=await headers(client),
-        json={**STUDENT, "correo": "ADMIN@example.com"},
+        json={**TEACHER, "correo": "ADMIN@example.com"},
     )
     assert response.status_code == 409
     async with database() as db:
@@ -359,7 +369,7 @@ async def test_ambiguous_legacy_identifier_is_rejected(client, database):
         await db.execute(update(Teacher).values(numero_empleado="20260001"))
         await db.commit()
     assert (await login(client, "20260001")).status_code == 401
-    assert (await login(client, "student@example.com")).status_code == 200
+    assert (await login(client, "teacher@example.com")).status_code == 200
 
 
 async def test_raw_driver_error_health_is_sanitized(client):

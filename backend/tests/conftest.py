@@ -74,7 +74,7 @@ async def database(tmp_path: Path, password_hash):
                     Role(id_rol=1, nombre="administrador"),
                     Role(id_rol=2, nombre="estudiante"),
                     Role(id_rol=3, nombre="docente"),
-                    Career(id_carrera=1, nombre="Sistemas", clave="ISC"),
+                    Career(nombre="Sistemas", clave="ISC"),
                 ]
             )
             await db.flush()

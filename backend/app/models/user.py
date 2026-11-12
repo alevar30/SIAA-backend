@@ -36,9 +36,10 @@ class User(Base):
     # BigInteger para coincidir con el tipo de las FK en profiles.py
     id_usuario: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     id_rol: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id_rol"), nullable=False)
-    nombre: Mapped[str] = mapped_column(String(150), nullable=False)
+    nombre: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    apellidos: Mapped[str | None] = mapped_column(String(150), nullable=True)
     # unique=True -> no se permiten dos cuentas con el mismo correo
-    correo: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
+    correo: Mapped[str | None] = mapped_column(String(150), unique=True, nullable=True, index=True)
     __table_args__ = (Index("uq_usuarios_correo_lower", func.lower(correo), unique=True),)
     # Aquí se guarda el HASH, nunca la contraseña en texto plano
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -55,3 +56,11 @@ class User(Base):
     rol: Mapped["Role"] = relationship("Role", back_populates="usuarios")
     estudiante: Mapped[Optional["Student"]] = relationship("Student", back_populates="usuario", uselist=False)
     docente: Mapped[Optional["Teacher"]] = relationship("Teacher", back_populates="usuario", uselist=False)
+
+    @property
+    def nombre_completo(self) -> str:
+        return " ".join(filter(None, (self.nombre, self.apellidos))) or "Perfil pendiente"
+
+    @property
+    def requiere_completar_perfil(self) -> bool:
+        return self.estudiante is not None and self.estudiante.id_carrera is None

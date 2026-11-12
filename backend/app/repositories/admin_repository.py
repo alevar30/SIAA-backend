@@ -25,10 +25,6 @@ class AdminRepository:
         return await db.scalar(select(Teacher).where(Teacher.numero_empleado == numero_empleado))
 
     @staticmethod
-    async def get_career(db: AsyncSession, id_carrera: int) -> Career | None:
-        return await db.get(Career, id_carrera)
-
-    @staticmethod
     async def create_with_profile(db: AsyncSession, usuario: User, profile: Student | Teacher) -> User:
         db.add(usuario)
         await db.flush()
@@ -60,7 +56,9 @@ class AdminRepository:
         if search:
             conditions.append(
                 or_(
-                    User.nombre.icontains(search, autoescape=True),
+                    (func.coalesce(User.nombre, "") + " " + func.coalesce(User.apellidos, "")).icontains(
+                        search, autoescape=True
+                    ),
                     User.correo.icontains(search, autoescape=True),
                     Student.matricula.icontains(search, autoescape=True),
                     Teacher.numero_empleado.icontains(search, autoescape=True),

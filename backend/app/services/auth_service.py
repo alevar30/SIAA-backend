@@ -3,8 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
 from app.core.security import create_access_token, get_password_hash, verify_password
+from app.models.academic import Career
+from app.models.user import User
 from app.repositories.auth_repository import AuthRepository
-from app.schemas.auth import ChangePasswordRequest, LoginRequest
+from app.schemas.auth import ChangePasswordRequest, CompleteStudentProfileRequest, LoginRequest
 
 repo = AuthRepository()
 # Hash válido para que un identificador inexistente también haga una verificación bcrypt.
@@ -33,13 +35,12 @@ class AuthService:
             "debe_cambiar_contrasena": usuario.debe_cambiar_contrasena,
             "requiere_cambio_contrasena": usuario.debe_cambiar_contrasena,
             "id_usuario": usuario.id_usuario,
-            "nombre": usuario.nombre,
+            "nombre": usuario.nombre_completo,
             "rol": usuario.rol.nombre,
         }
 
     @staticmethod
-    async def cambiar_contrasena(db: AsyncSession, usuario, datos: ChangePasswordRequest):
-        expected_version = usuario.token_version
+    async def _change_password(db: AsyncSession, usuario: User, datos: ChangePasswordRequest):
         if datos.password_nueva != datos.password_nueva_confirm:
             raise HTTPException(status_code=400, detail="Las contraseñas nuevas no coinciden")
         if not await run_in_threadpool(verify_password, datos.password_actual, usuario.password_hash):
@@ -47,14 +48,43 @@ class AuthService:
         if datos.password_actual == datos.password_nueva:
             raise HTTPException(status_code=400, detail="La nueva contraseña debe ser diferente de la actual")
         new_hash = await run_in_threadpool(get_password_hash, datos.password_nueva)
-        if not await repo.update_password(db, usuario, new_hash, expected_version):
+        if not await repo.update_password(db, usuario, new_hash):
+            await db.rollback()
             raise HTTPException(
                 status_code=401,
                 detail="La sesión cambió; inicia sesión nuevamente",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+    @staticmethod
+    async def cambiar_contrasena(db: AsyncSession, usuario: User, datos: ChangePasswordRequest):
+        if usuario.requiere_completar_perfil:
+            raise HTTPException(status_code=409, detail="Completa tu perfil para establecer tu contraseña")
+        await AuthService._change_password(db, usuario, datos)
+        await db.commit()
         return {
             "message": "Contraseña actualizada. Inicia sesión nuevamente.",
+            "debe_cambiar_contrasena": False,
+            "requiere_nuevo_login": True,
+        }
+
+    @staticmethod
+    async def complete_student_profile(db: AsyncSession, usuario: User, datos: CompleteStudentProfileRequest):
+        student = usuario.estudiante
+        if usuario.rol.nombre != "estudiante" or student is None:
+            raise HTTPException(status_code=403, detail="Solo los estudiantes pueden completar este perfil")
+        if not usuario.requiere_completar_perfil:
+            raise HTTPException(status_code=409, detail="Tu perfil ya está completo")
+        career = await db.get(Career, datos.id_carrera)
+        if career is None or not career.activo:
+            raise HTTPException(status_code=409, detail="Selecciona una carrera activa")
+        await AuthService._change_password(db, usuario, datos)
+        usuario.nombre = datos.nombre
+        usuario.apellidos = datos.apellidos
+        student.id_carrera = career.id_carrera
+        await db.commit()
+        return {
+            "message": "Perfil guardado. Inicia sesión con tu nueva contraseña.",
             "debe_cambiar_contrasena": False,
             "requiere_nuevo_login": True,
         }

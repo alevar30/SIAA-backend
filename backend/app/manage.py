@@ -21,7 +21,7 @@ async def manage(command: str, correo: str, nombre: str | None = None) -> str:
     correo = str(TypeAdapter(EmailStr).validate_python(correo)).lower()
     if len(correo) > 150:
         raise ValueError("El correo no puede superar 150 caracteres")
-    password = generate_temporary_password()
+    password = generate_temporary_password(short=command == "reset-password")
     async with AsyncSessionLocal() as db:
         try:
             if command == "bootstrap-admin":

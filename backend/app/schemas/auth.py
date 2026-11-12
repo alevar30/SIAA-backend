@@ -49,11 +49,25 @@ class ChangePasswordResponse(BaseModel):
     requiere_nuevo_login: bool
 
 
+class CompleteStudentProfileRequest(ChangePasswordRequest):
+    nombre: str = Field(min_length=1, max_length=150)
+    apellidos: str = Field(min_length=1, max_length=150)
+    id_carrera: int = Field(gt=0, le=2147483647)
+
+    @field_validator("nombre", "apellidos", mode="before")
+    @classmethod
+    def strip_name(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+
 class CurrentUserResponse(BaseModel):
     id_usuario: int
     nombre: str
-    correo: str
+    correo: str | None
     rol: str
     debe_cambiar_contrasena: bool
+    requiere_completar_perfil: bool
+    matricula: str | None = None
+    carrera: str | None = None
     id_estudiante: int | None = None
     id_docente: int | None = None

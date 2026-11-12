@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -18,7 +18,7 @@ class AuthRepository:
             .options(joinedload(User.rol))
             .where(
                 or_(
-                    func.lower(User.correo) == identifier.lower(),
+                    and_(Student.id_estudiante.is_(None), func.lower(User.correo) == identifier.lower()),
                     Student.matricula == identifier,
                     Teacher.numero_empleado == identifier,
                 )
@@ -32,26 +32,32 @@ class AuthRepository:
     async def get_by_id(db: AsyncSession, id_usuario: int) -> User | None:
         result = await db.execute(
             select(User)
-            .options(joinedload(User.rol), joinedload(User.estudiante), joinedload(User.docente))
+            .options(
+                joinedload(User.rol),
+                joinedload(User.estudiante).joinedload(Student.carrera),
+                joinedload(User.docente),
+            )
             .where(User.id_usuario == id_usuario)
         )
         return result.unique().scalar_one_or_none()
 
     @staticmethod
-    async def update_password(db: AsyncSession, usuario: User, new_hash: str, expected_version: int) -> bool:
+    async def update_password(
+        db: AsyncSession, usuario: User, new_hash: str, *, temporary: bool = False
+    ) -> bool:
         result = await db.execute(
             update(User)
-            .where(User.id_usuario == usuario.id_usuario, User.token_version == expected_version)
+            .where(
+                User.id_usuario == usuario.id_usuario,
+                User.token_version == usuario.token_version,
+                User.activo.is_(True),
+            )
             .values(
                 password_hash=new_hash,
-                debe_cambiar_contrasena=False,
+                debe_cambiar_contrasena=temporary,
                 fecha_ultimo_cambio=datetime.now(timezone.utc).replace(tzinfo=None),
                 token_version=User.token_version + 1,
             )
             .execution_options(synchronize_session=False)
         )
-        if result.rowcount != 1:
-            await db.rollback()
-            return False
-        await db.commit()
-        return True
+        return result.rowcount == 1

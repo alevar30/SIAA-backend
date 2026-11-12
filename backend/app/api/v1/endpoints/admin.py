@@ -1,11 +1,16 @@
-from typing import Literal
-from fastapi import APIRouter, Depends, Query, Response, status
+from typing import Annotated, Literal
+from fastapi import APIRouter, Depends, Path, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import require_admin
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.admin import AltaDocenteRequest, AltaEstudianteRequest, UsuarioCreadoResponse
+from app.schemas.admin import (
+    AltaDocenteRequest,
+    AltaEstudianteRequest,
+    TemporaryPasswordResponse,
+    UsuarioCreadoResponse,
+)
 from app.services.admin_service import AdminService
 from app.repositories.admin_repository import AdminRepository
 from app.schemas.admin import CareerResponse, CareerCreateRequest, UserListResponse, AdminSummaryResponse
@@ -79,3 +84,14 @@ async def summary(
 ):
     response.headers["Cache-Control"] = "no-store"
     return await AdminRepository.summary(db)
+
+
+@router.post("/usuarios/{user_id}/restablecer-contrasena", response_model=TemporaryPasswordResponse)
+async def reset_password(
+    user_id: Annotated[int, Path(ge=1, le=9223372036854775807)],
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    response.headers["Cache-Control"] = "no-store"
+    return await AdminService.reset_password(db, user_id, current_user)

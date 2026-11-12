@@ -24,8 +24,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         return False
 
 
-def generate_temporary_password() -> str:
-    return secrets.token_urlsafe(18)
+def generate_temporary_password(*, short: bool = False) -> str:
+    return secrets.token_urlsafe(6 if short else 18)
 
 
 def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:

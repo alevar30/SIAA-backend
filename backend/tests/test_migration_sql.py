@@ -13,3 +13,6 @@ def test_migrations_generate_postgres_sql_without_database():
     assert "ADD COLUMN token_version" in sql
     assert "CREATE UNIQUE INDEX uq_usuarios_correo_lower ON usuarios (lower(correo))" in sql
     assert "20261030_01" in sql
+    assert "ADD COLUMN apellidos VARCHAR(150)" in sql
+    assert "ALTER COLUMN correo DROP NOT NULL" in sql
+    assert "ALTER COLUMN id_carrera DROP NOT NULL" in sql

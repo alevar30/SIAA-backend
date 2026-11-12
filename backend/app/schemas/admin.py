@@ -12,10 +12,9 @@ class UserCreateBase(BaseModel):
         return value.lower()
 
 
-class AltaEstudianteRequest(UserCreateBase):
+class AltaEstudianteRequest(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     matricula: str = Field(min_length=4, max_length=30, pattern=r"^[A-Za-z0-9_-]+$")
-    id_carrera: int = Field(gt=0, le=2147483647)
-    semestre: int | None = Field(default=None, ge=1, le=12)
 
 
 class AltaDocenteRequest(UserCreateBase):
@@ -23,12 +22,16 @@ class AltaDocenteRequest(UserCreateBase):
     departamento: str | None = Field(default=None, max_length=100)
 
 
-class UsuarioCreadoResponse(BaseModel):
+class TemporaryPasswordResponse(BaseModel):
+    password_temporal: str
+
+
+class UsuarioCreadoResponse(TemporaryPasswordResponse):
     id_usuario: int
     nombre: str
-    correo: str
+    correo: str | None
     rol: str
-    password_temporal: str
+    matricula: str | None = None
     debe_cambiar_contrasena: bool
     mensaje: str
 
@@ -55,10 +58,11 @@ class CareerCreateRequest(BaseModel):
 class UserSummaryResponse(BaseModel):
     id_usuario: int
     nombre: str
-    correo: str
+    correo: str | None
     rol: str
     activo: bool
     debe_cambiar_contrasena: bool
+    requiere_completar_perfil: bool
     matricula: str | None = None
     carrera: str | None = None
     semestre: int | None = None

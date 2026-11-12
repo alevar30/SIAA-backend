@@ -60,7 +60,9 @@ Resuelve cada duplicado revisando sus perfiles; no borres cuentas automáticamen
 La migración fallará de forma explícita si existen estos duplicados.
 
 3. Ejecuta `alembic upgrade head` con el entorno del proyecto. La revisión nueva es
-   `20261030_01`: añade `token_version` y el índice único de `lower(correo)`.
+   `20261111_01` permite registrar estudiantes antes de que completen su perfil.
+   Si aún no aplicaste `20261030_01`, Alembic también añadirá `token_version` y el
+   índice único de `lower(correo)`.
 4. Reinicia la API con este código. Los tokens antiguos sin versión se rechazan: todos
    deben volver a iniciar sesión.
 5. Para cuentas que todavía usan `SIAA-<identificador>`, restablece su contraseña:
@@ -84,8 +86,11 @@ el contador y la restricción de correo; no recupera las contraseñas anteriores
 | `POST /api/v1/auth/login` | Público | JWT, rol y estado del cambio de contraseña |
 | `GET /api/v1/auth/me` | Token válido | Identidad y IDs de perfil, sin hash |
 | `POST /api/v1/auth/cambiar-contrasena` | Token válido | Cambio y obligación de nuevo login |
+| `GET /api/v1/auth/primer-acceso/carreras` | Estudiante con perfil pendiente | Carreras activas |
+| `POST /api/v1/auth/primer-acceso` | Estudiante con perfil pendiente | Guarda el perfil y cambia la contraseña |
 | `POST /api/v1/admin/estudiantes` | Administrador con contraseña definitiva | Usuario/perfil y contraseña temporal |
 | `POST /api/v1/admin/docentes` | Administrador con contraseña definitiva | Usuario/perfil y contraseña temporal |
+| `POST /api/v1/admin/usuarios/{user_id}/restablecer-contrasena` | Administrador con contraseña definitiva | Genera una contraseña temporal nueva y revoca sesiones |
 | `GET /health` | Público | Proceso disponible |
 | `GET /health-db` | Público | 200 si la BD responde; 503 si falla |
 | `GET /api/v1/ping` | Público | Diagnóstico de enrutamiento |
@@ -100,9 +105,12 @@ La respuesta mantiene `debe_cambiar_contrasena` y `requiere_cambio_contrasena` p
 compatibilidad; ambos representan el mismo estado. Guarda el token como credencial
 sensible y envíalo mediante `Authorization: Bearer <token>`.
 
-Consulta `/auth/me` al restaurar la sesión. Si `debe_cambiar_contrasena` es verdadero,
-muestra el cambio de contraseña. El backend bloquea las rutas de negocio aunque
-alguien intente saltarse esta pantalla.
+Los estudiantes usan su número de control como identificador. El personal puede
+usar su correo o, en el caso de docentes, su número de empleado.
+Consulta `/auth/me` al restaurar la sesión. Si `requiere_completar_perfil` es
+verdadero, muestra el primer acceso. Si solo `debe_cambiar_contrasena` es
+verdadero, muestra el cambio de contraseña. El backend bloquea las rutas de
+negocio hasta cumplir el requisito correspondiente.
 
 Cambio de contraseña:
 
@@ -125,27 +133,26 @@ contraseña nueva. Todos los tokens anteriores del usuario dejan de funcionar.
 Alta de estudiante:
 
 ```json
-{
-  "nombre":"Ana Pérez",
-  "correo":"ana@tuinstitucion.edu",
-  "matricula":"20260001",
-  "id_carrera":1,
-  "semestre":1
-}
+{"matricula":"20260001"}
 ```
 
-La carrera debe existir y estar activa. El alta de docente requiere `nombre`, `correo`,
-`numero_empleado` y opcionalmente `departamento`. Matrículas y números de empleado
-admiten letras ASCII, números, guion y guion bajo; se conserva su capitalización.
+En el primer acceso, el estudiante envía `nombre`, `apellidos`, `id_carrera`
+y los tres campos del cambio de contraseña a `POST /auth/primer-acceso`.
+La carrera debe existir y estar activa. Los estudiantes ya registrados conservan
+su perfil. El alta de docente requiere `nombre`, `correo`, `numero_empleado`
+y opcionalmente `departamento`. Los identificadores admiten letras ASCII,
+números, guion y guion bajo y conservan su capitalización.
 
-Las altas responden 201 con `password_temporal` (reemplaza a `password_generica`).
-La contraseña es aleatoria y solo se almacena su hash. La respuesta no se debe registrar
-ni conservar en analítica. Se entrega por un canal privado y se muestra únicamente
-al administrador que realizó el alta.
+Las altas responden 201 con `password_temporal`. Para estudiantes y restablecimientos,
+la contraseña temporal es aleatoria y tiene 8 caracteres. Solo se almacena su hash
+y se entrega el valor original una vez al administrador que realizó la operación.
+El restablecimiento exige un cambio de contraseña y conserva el estado del perfil.
+Para cambiar su propia contraseña, el administrador usa la sección Seguridad.
 
 Errores relevantes: 400 para cambio inválido, 401 para credenciales/token inválidos,
-403 para rol insuficiente/cuenta desactivada/cambio obligatorio, 404 para carrera
-inexistente, 409 para duplicados/referencias en conflicto y 422 para entradas inválidas.
+403 para rol insuficiente/cuenta desactivada/acceso pendiente, 404 para usuario
+inexistente al restablecer, 409 para duplicados o conflictos de estado y 422 para
+entradas inválidas.
 Los permisos y el estado actual se leen de BD, no del rol que recuerde el frontend.
 
 ## Ejecutar pruebas
@@ -204,8 +211,7 @@ restringidas a administradores que ya cambiaron su contraseña temporal:
 
 Las consultas no devuelven hashes ni contraseñas. La búsqueda trata `%` y `_` como
 caracteres literales y la paginación limita el tamaño de cada consulta.
-Estas rutas usan las tablas existentes, por lo que no añaden otra migración.
-La migración `20261030_01` de la corrección de sesiones sigue siendo necesaria.
+Aplica `alembic upgrade head` antes de iniciar esta versión del backend.
 
 El frontend tiene login, cambio obligatorio/voluntario de contraseña, perfil, resumen,
 listado y altas de estudiantes/docentes, carreras y entrega de contraseña temporal.
