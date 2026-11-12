@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from datetime import datetime, timedelta, timezone
+import secrets
+from typing import Any
 
 import bcrypt
 from jose import JWTError, jwt
@@ -8,38 +9,43 @@ from app.core.config import settings
 
 
 def get_password_hash(password: str) -> str:
-    """Genera un hash bcrypt de la contraseña."""
     pwd_bytes = password.encode("utf-8")
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(pwd_bytes, salt)
-    return hashed.decode("utf-8")
+    if len(pwd_bytes) > 72:
+        raise ValueError("La contraseña supera el límite de 72 bytes de bcrypt")
+    return bcrypt.hashpw(pwd_bytes, bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verifica si la contraseña en texto plano coincide con el hash."""
+    if len(plain_password.encode("utf-8")) > 72:
+        return False
     try:
         return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
-    except Exception:
+    except (ValueError, TypeError):
         return False
 
 
-
-def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
-    """Crea un token JWT con los datos proporcionados."""
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
+def generate_temporary_password() -> str:
+    return secrets.token_urlsafe(18)
 
 
-def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
-    """Decodifica y valida un token JWT. Devuelve el payload o None si es inválido."""
+def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
+    now = datetime.now(timezone.utc)
+    lifetime = (
+        expires_delta
+        if expires_delta is not None
+        else timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    payload = {**data, "iat": now, "exp": now + lifetime}
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def decode_access_token(token: str) -> dict[str, Any] | None:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        return payload
+        return jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+            options={"require_exp": True, "require_iat": True, "require_sub": True},
+        )
     except JWTError:
         return None

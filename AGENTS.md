@@ -1,63 +1,53 @@
 # AGENTS.md
 
-SIAA (Sistema Institucional de Asesorías Académicas) — academic advising management system. FastAPI + PostgreSQL backend, React + Vite frontend. Docs and UI are written in Spanish.
+SIAA: Sistema Institucional de Asesorías Académicas. Backend FastAPI + PostgreSQL;
+frontend previsto React + Vite. Documentación e interfaz en español.
 
-i am an stundent, very time i ask you or you do something explain it to me and tell me why you decide that
+El autor es estudiante: explica qué cambias y por qué, con ejemplos claros.
 
-## Current state — read before doing anything
+## Estado comprobado
 
-This is an **early scaffold**, not a working app. Do not assume folders contain functionality:
+- Autenticación JWT, login JSON por correo/matrícula/número de empleado, `/auth/me`,
+  cambio de contraseña y altas de estudiantes/docentes restringidas a administrador.
+- El acceso a operaciones de negocio requiere `get_ready_user` o `require_roles`;
+  `get_current_user` permite el acceso limitado a `/me` y cambio de contraseña.
+- Contraseñas temporales aleatorias, bcrypt con límite de 72 bytes UTF-8.
+- `token_version` se consulta en BD: cambio o restablecimiento revoca tokens anteriores.
+- Siete tablas de dominio y tres migraciones. La aplicación no ejecuta migraciones al iniciar.
+  No asumir que una migración está aplicada en una base externa.
+- Pruebas en `backend/tests`: SQLite aislado por defecto; PostgreSQL mediante
+  `TEST_DATABASE_URL`, con esquemas aleatorios desechables y prueba de migraciones.
+- El frontend React + TypeScript + Vite existe en la carpeta vecina `../SIAA-frontend`.
+- Hay consultas administrativas de usuarios, carreras y resumen, y alta de carreras.
+- No existen disponibilidades, asesorías, participantes ni relaciones N:M académicas.
+- Git inicializado, con commits previos y `.gitignore`. `.env.example` está versionado;
+  `.env` y `.venv` se ignoran. Nunca imprimir credenciales locales.
 
-- **Written and working**: `app/main.py` defines `app = FastAPI(...)` plus a `GET /health-db` diagnostic route (runs `SELECT 1` via `Depends(get_db)`) and mounts `app/api/v1/router.py`. `app/core/config.py` defines `Settings` (pydantic-settings; reads `.env`, exposes `ASYNC_DATABASE_URL`). `app/db/session.py` defines the async engine, `AsyncSessionLocal` and the `get_db()` dependency. `app/db/base.py` defines `Base` (`DeclarativeBase`), so **all models import correctly**. `app/models/user.py` (`Role`, `User`), `app/models/academic.py` (`Career`, `Subject`, `Topic`) and `app/models/profiles.py` (`Student`, `Teacher`) exist — **7 tables registered** in `Base.metadata`.
-- Still **empty (0 bytes)**: `app/core/session.py`.
-- **Alembic is now set up and runnable**: `alembic.ini` filled, `alembic/env.py` complete (sync `psycopg` driver, `psycopg[binary]` added to requirements and installed), and the first migration (`crear tablas iniciales`) is **applied** — the 7 domain tables exist in PostgreSQL. Missing tables from the guide (`disponibilidades`, `asesorias`, `participantes_asesoria`, M2M tables) are **not modeled yet**.
-- `frontend/` **does not exist** — React + Vite has not been scaffolded.
-- The repo **is** a git repository now, but has **no commits yet** and no `.gitignore` (`.env` is untracked but not ignored — keep secrets out of commits).
+## Comandos (Windows; desde backend)
 
-## Commands
-
-Backend (Python 3.12; deps are already installed in `backend/.venv`):
-
-```bash
-cd backend
-source .venv/bin/activate          # or call .venv/bin/python directly
-uvicorn app.main:app --reload      # serves `app`; only /health-db exists so far
-.venv/bin/pip install -r requirements.txt
+```powershell
+uv venv .venv # solo al crear el entorno
+uv pip sync --python .venv/Scripts/python.exe requirements-dev.lock
+.venv/Scripts/python.exe -m pytest -q
+.venv/Scripts/ruff.exe check app tests alembic
+.venv/Scripts/ruff.exe format --check app tests
+.venv/Scripts/python.exe -m alembic upgrade head
+.venv/Scripts/python.exe -m uvicorn app.main:app --reload
 ```
 
-- `pytest` is the intended test runner but **pytest/httpx are not installed** yet. Guide layout expects `backend/tests/{unit,integration}` + `conftest.py` (not created).
-- Alembic (only after filling the empty `alembic.ini` and completing `alembic/env.py`):
+En entornos con temporales restringidos, crear `.test-tmp` y pasar una carpeta
+nueva mediante `--basetemp=.test-tmp/identificador-unico` a pytest.
 
-```bash
-alembic revision --autogenerate -m "descripcion"
-alembic upgrade head
-alembic history
-```
+## Convenciones
 
-Frontend (only after scaffolding with `npm create vite@latest frontend -- --template react`):
-
-```bash
-npm install
-npm run dev
-npm run build
-```
-
-## Configuration / env quirks
-
-- `backend/.env` exists with **local dev credentials** using `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_SERVER`, `POSTGRES_PORT`, `POSTGRES_DB`, plus `SECRET_KEY`.
-- The guide's examples use a single `DATABASE_URL` instead, but `app/core/config.py` already follows the `POSTGRES_*` form and builds `ASYNC_DATABASE_URL` from it, so follow that convention.
-- No `.env.example` exists. Keep real secrets out of any `.env.example` you create.
-
-## Intended architecture (from the guide's scaffold)
-
-- API prefix `/api/v1`; routers should live in `app/api/v1/endpoints/` (not created yet), aggregated by the currently-empty `app/api/v1/router.py` and mounted from `main.py`.
-- Layering: endpoints → Pydantic schemas → services → repositories → SQLAlchemy models. `services/` and `repositories/` are planned but not yet created.
-- DB access is **async SQLAlchemy 2.0 + asyncpg**; auth is **JWT (python-jose) + passlib[bcrypt]**.
-- Domain entities: `roles, usuarios, estudiantes, docentes, carreras, materias, temas, disponibilidades, asesorias, participantes_asesoria`. Individual and group advising sessions share the `asesorias` table (ADR-003).
-
-## Documentation conflict — resolved
-
-Two architecture docs exist at the root:
-
-- `GUIA_SIAA_REACT_FASTAPI.md` — detailed, authoritative dev guide. ADR-001 explicitly decides **React + Vite**.
-- `PROJECT_WORKFLOW.md` — architecture/workflow summary. It previously mentioned Flutter/React Native, but it has been **updated to React + Vite** to match ADR-001. If you see the old Flutter wording anywhere, treat it as outdated.
+- Endpoints → validación Pydantic → servicios → repositorios → SQLAlchemy/BD.
+- API bajo `/api/v1`, montada una sola vez en `app/main.py`.
+- SQLAlchemy async + asyncpg; Alembic usa psycopg síncrono.
+- Configuración `POSTGRES_*`, `SECRET_KEY` aleatoria de al menos 32 caracteres;
+  `.env` se resuelve respecto de `backend/`, sin depender del directorio actual.
+- Las contraseñas temporales se entregan una sola vez en `password_temporal`.
+- `app.manage` permite bootstrap del primer administrador y restablecimiento local.
+  No ejecutar contra una base externa sin autorización aplicable.
+- `README.md` y `PROJECT_WORKFLOW.md` describen el código actual. La guía extensa
+  conserva los objetivos/ADR y ejemplos de aprendizaje; no es un inventario actual.
+- No cambiar React + Vite (ADR-001). Individual y grupal compartirán `asesorias` (ADR-003).

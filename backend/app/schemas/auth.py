@@ -1,11 +1,23 @@
-from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class LoginRequest(BaseModel):
-    """Solo número de control (matrícula)."""
-    identificador: str = Field(min_length=3, description="Número de control")
-    password: str = Field(min_length=4)
+    identificador: str = Field(
+        min_length=3, max_length=150, description="Correo, matrícula o número de empleado"
+    )
+    password: str = Field(min_length=4, max_length=72)
+
+    @field_validator("identificador", mode="before")
+    @classmethod
+    def normalize_identifier(cls, value: str) -> str:
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_bytes(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("La contraseña no puede superar 72 bytes UTF-8")
+        return value
 
 
 class LoginResponse(BaseModel):
@@ -19,6 +31,29 @@ class LoginResponse(BaseModel):
 
 
 class ChangePasswordRequest(BaseModel):
-    password_actual: str = Field(min_length=4)
-    password_nueva: str = Field(min_length=6)
-    password_nueva_confirm: str = Field(min_length=6)
+    password_actual: str = Field(min_length=4, max_length=72)
+    password_nueva: str = Field(min_length=12, max_length=72)
+    password_nueva_confirm: str = Field(min_length=12, max_length=72)
+
+    @field_validator("password_actual", "password_nueva", "password_nueva_confirm")
+    @classmethod
+    def validate_password_bytes(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("La contraseña no puede superar 72 bytes UTF-8")
+        return value
+
+
+class ChangePasswordResponse(BaseModel):
+    message: str
+    debe_cambiar_contrasena: bool
+    requiere_nuevo_login: bool
+
+
+class CurrentUserResponse(BaseModel):
+    id_usuario: int
+    nombre: str
+    correo: str
+    rol: str
+    debe_cambiar_contrasena: bool
+    id_estudiante: int | None = None
+    id_docente: int | None = None

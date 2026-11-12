@@ -1,5 +1,10 @@
 # SIAA — Guía de desarrollo con React, FastAPI y PostgreSQL
 
+> Nota de estado (30/10/2026): esta guía conserva el plan y los ejemplos de aprendizaje.
+> Para instalación, contratos y funcionalidad realmente implementada consulta `README.md`
+> y `PROJECT_WORKFLOW.md`. Ya existen autenticación, permisos, altas y pruebas;
+> disponibilidad, asesorías, reservaciones y frontend siguen pendientes.
+
 > **Proyecto:** Sistema Institucional de Asesorías Académicas (SIAA)  
 > **Objetivo técnico:** construir una aplicación web mantenible, segura y preparada para evolucionar a producción.  
 > **Objetivo de aprendizaje:** entender cada capa del sistema en lugar de limitarse a copiar código.

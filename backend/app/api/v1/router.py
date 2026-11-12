@@ -17,5 +17,3 @@ async def ping() -> dict:
 
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
-
-

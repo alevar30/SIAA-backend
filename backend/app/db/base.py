@@ -16,4 +16,5 @@ class Base(DeclarativeBase):
     - El estilo moderno 2.0 (el que usan nuestros modelos con `Mapped[...]`)
       es heredar de `DeclarativeBase`. Mantener un solo estilo evita errores.
     """
+
     pass

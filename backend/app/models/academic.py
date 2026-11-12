@@ -1,7 +1,11 @@
-from typing import Optional, List
-from sqlalchemy import String, Boolean, SmallInteger, Integer, BigInteger, ForeignKey, Text
+from typing import TYPE_CHECKING, Optional, List
+from sqlalchemy import String, Boolean, Integer, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.profiles import Student
+
 
 class Career(Base):
     __tablename__ = "carreras"

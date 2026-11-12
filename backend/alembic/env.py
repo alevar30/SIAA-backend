@@ -7,9 +7,9 @@ from sqlalchemy import engine_from_config, pool
 from app.core.config import settings
 from app.db.base import Base
 # Importa TODOS los modelos para que Alembic detecte las tablas
-from app.models.user import Role, User
-from app.models.academic import Career, Subject, Topic
-from app.models.profiles import Student, Teacher
+import app.models.user  # noqa: F401
+import app.models.academic  # noqa: F401
+import app.models.profiles  # noqa: F401
 
 config = context.config
 
@@ -48,6 +48,14 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Migraciones 'online': se conecta a la BD y ejecuta las sentencias."""
+    # Permite migraciones verificadas dentro de un esquema de prueba aislado.
+    provided_connection = config.attributes.get("connection")
+    if provided_connection is not None:
+        context.configure(connection=provided_connection, target_metadata=target_metadata)
+        with context.begin_transaction():
+            context.run_migrations()
+        return
+
     # Se parte de la configuración de alembic.ini y se inyecta la URL real
     configuration = config.get_section(config.config_ini_section, {})
     configuration["sqlalchemy.url"] = get_url()
