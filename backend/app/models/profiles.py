@@ -30,6 +30,7 @@ class Teacher(Base):
     id_usuario: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("usuarios.id_usuario"), unique=True, nullable=False
     )
+    academic_version: Mapped[int] = mapped_column(Integer, default=1, server_default="1", nullable=False)
     numero_empleado: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
     departamento: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 

@@ -42,3 +42,6 @@ build/
 
 # Archivos temporales de pruebas
 .test-tmp/
+
+# Respaldos locales con datos; nunca versionar
+backend/.local-backups/

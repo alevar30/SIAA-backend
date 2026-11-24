@@ -6,10 +6,12 @@ from sqlalchemy import engine_from_config, pool
 # Configuración y modelos del proyecto
 from app.core.config import settings
 from app.db.base import Base
+
 # Importa TODOS los modelos para que Alembic detecte las tablas
 import app.models.user  # noqa: F401
 import app.models.academic  # noqa: F401
 import app.models.profiles  # noqa: F401
+import app.models.advising  # noqa: F401
 
 config = context.config
 
@@ -27,9 +29,7 @@ def get_url() -> str:
     La app usa asyncpg (asíncrono), pero Alembic ejecuta las migraciones
     en modo SÍNCRONO, así que se cambia el driver a psycopg.
     """
-    return settings.ASYNC_DATABASE_URL.replace(
-        "postgresql+asyncpg://", "postgresql+psycopg://"
-    )
+    return settings.ASYNC_DATABASE_URL.replace("postgresql+asyncpg://", "postgresql+psycopg://")
 
 
 def run_migrations_offline() -> None:
@@ -67,9 +67,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

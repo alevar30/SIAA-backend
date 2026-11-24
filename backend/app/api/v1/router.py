@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import admin, auth
+from app.api.v1.endpoints import admin, auth, academic, advising
 
 # Router principal de la API
 api_router = APIRouter(prefix="/api/v1")
@@ -17,3 +17,8 @@ async def ping() -> dict:
 
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
+
+api_router.include_router(academic.admin_router, tags=["Catálogo administrativo"])
+api_router.include_router(academic.public_router, tags=["Catálogo académico"])
+api_router.include_router(academic.teacher_router, tags=["Docencia"])
+api_router.include_router(advising.router)

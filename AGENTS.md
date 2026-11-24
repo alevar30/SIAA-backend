@@ -13,13 +13,21 @@ El autor es estudiante: explica qué cambias y por qué, con ejemplos claros.
   `get_current_user` permite el acceso limitado a `/me` y cambio de contraseña.
 - Contraseñas temporales aleatorias, bcrypt con límite de 72 bytes UTF-8.
 - `token_version` se consulta en BD: cambio o restablecimiento revoca tokens anteriores.
-- Siete tablas de dominio y tres migraciones. La aplicación no ejecuta migraciones al iniciar.
+- Trece tablas de dominio y siete migraciones. La aplicación no ejecuta migraciones al iniciar.
   No asumir que una migración está aplicada en una base externa.
 - Pruebas en `backend/tests`: SQLite aislado por defecto; PostgreSQL mediante
   `TEST_DATABASE_URL`, con esquemas aleatorios desechables y prueba de migraciones.
 - El frontend React + TypeScript + Vite existe en la carpeta vecina `../SIAA-frontend`.
 - Hay consultas administrativas de usuarios, carreras y resumen, y alta de carreras.
-- No existen disponibilidades, asesorías, participantes ni relaciones N:M académicas.
+- Catálogo de materias/temas y relaciones carrera-materia, docente-materia y docente-tema implementados.
+- Administración asigna materias; el docente crea temas en ellas, edita los propios y selecciona temas compartidos.
+- `temas.id_creador` conserva autoría; los temas anteriores quedan sin autor atribuido y bajo control administrativo.
+- Temas con asesorías solo permiten cambios de estado; contenido protegido para conservar historial.
+- Las ediciones del catálogo y asignaciones usan `version` para detectar cambios concurrentes.
+- Disponibilidad por fecha, asesorías individuales/grupales, reservas, cancelación e historial implementados.
+- El docente responsable finaliza sesiones tras su término y registra asistencia.
+- Cambios de agenda/cupo bloquean primero la fila del docente; reservas también bloquean estudiante.
+- Las fechas exigen zona horaria y se normalizan a UTC; React muestra la zona del dispositivo.
 - Git inicializado, con commits previos y `.gitignore`. `.env.example` está versionado;
   `.env` y `.venv` se ignoran. Nunca imprimir credenciales locales.
 

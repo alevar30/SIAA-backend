@@ -1,0 +1,411 @@
+{
+  "fuente": "Retícula Sistemas Alumnos.xlsx",
+  "sha256": "a002bee0a0bba07fd7aa5a6a65ceb627f99f5d6bbb3a570a4e1921b5d8d09ab3",
+  "hoja": "Esp \"D\"",
+  "plan": "INGENIERÍA EN SISTEMAS COMPUTACIONALES [ISIC-2010-224]",
+  "especialidad": "Especialidad \"D\": Inteligencia Artificial Aplicada [ISIE-IAA-2022-01]",
+  "materias": [
+    {
+      "clave": "ACF-0901",
+      "nombre": "Cálculo Diferencial",
+      "semestre_fuente": 1,
+      "celda_nombre": "C6",
+      "celda_clave": "C9"
+    },
+    {
+      "clave": "AED-1285",
+      "nombre": "Fundamentos de Programación",
+      "semestre_fuente": 1,
+      "celda_nombre": "C12",
+      "celda_clave": "C15"
+    },
+    {
+      "clave": "ACA-0907",
+      "nombre": "Taller de Ética",
+      "semestre_fuente": 1,
+      "celda_nombre": "C18",
+      "celda_clave": "C21"
+    },
+    {
+      "clave": "AEF-1041",
+      "nombre": "Matemáticas Discretas",
+      "semestre_fuente": 1,
+      "celda_nombre": "C24",
+      "celda_clave": "C27"
+    },
+    {
+      "clave": "SCH-1024",
+      "nombre": "Taller de Administración",
+      "semestre_fuente": 1,
+      "celda_nombre": "C30",
+      "celda_clave": "C33"
+    },
+    {
+      "clave": "ACC-0906",
+      "nombre": "Fundamentos de Investigación",
+      "semestre_fuente": 1,
+      "celda_nombre": "C36",
+      "celda_clave": "C39"
+    },
+    {
+      "clave": "ACF-0902",
+      "nombre": "Cálculo Integral",
+      "semestre_fuente": 2,
+      "celda_nombre": "H6",
+      "celda_clave": "H9"
+    },
+    {
+      "clave": "AED-1286",
+      "nombre": "Programación Orientada a Objetos",
+      "semestre_fuente": 2,
+      "celda_nombre": "H12",
+      "celda_clave": "H15"
+    },
+    {
+      "clave": "AEC-1008",
+      "nombre": "Contabilidad Financiera",
+      "semestre_fuente": 2,
+      "celda_nombre": "H18",
+      "celda_clave": "H21"
+    },
+    {
+      "clave": "AEC-1058",
+      "nombre": "Química",
+      "semestre_fuente": 2,
+      "celda_nombre": "H24",
+      "celda_clave": "H27"
+    },
+    {
+      "clave": "ACF-0903",
+      "nombre": "Algebra Lineal",
+      "semestre_fuente": 2,
+      "celda_nombre": "H30",
+      "celda_clave": "H33"
+    },
+    {
+      "clave": "AEF-1052",
+      "nombre": "Probabilidad y Estadística",
+      "semestre_fuente": 2,
+      "celda_nombre": "H36",
+      "celda_clave": "H39"
+    },
+    {
+      "clave": "ACF-0904",
+      "nombre": "Cálculo Vectorial",
+      "semestre_fuente": 3,
+      "celda_nombre": "M6",
+      "celda_clave": "M9"
+    },
+    {
+      "clave": "AED-1026",
+      "nombre": "Estructura de Datos",
+      "semestre_fuente": 3,
+      "celda_nombre": "M12",
+      "celda_clave": "M15"
+    },
+    {
+      "clave": "SCC-1005",
+      "nombre": "Cultura Empresarial",
+      "semestre_fuente": 3,
+      "celda_nombre": "M18",
+      "celda_clave": "M21"
+    },
+    {
+      "clave": "SCC-1013",
+      "nombre": "Investigación de Operaciones",
+      "semestre_fuente": 3,
+      "celda_nombre": "M24",
+      "celda_clave": "M27"
+    },
+    {
+      "clave": "ACD-0908",
+      "nombre": "Desarrollo Sustentable",
+      "semestre_fuente": 3,
+      "celda_nombre": "M30",
+      "celda_clave": "M33"
+    },
+    {
+      "clave": "SCF-1006",
+      "nombre": "Física General",
+      "semestre_fuente": 3,
+      "celda_nombre": "M36",
+      "celda_clave": "M39"
+    },
+    {
+      "clave": "ACF-0905",
+      "nombre": "Ecuaciones Diferenciales",
+      "semestre_fuente": 4,
+      "celda_nombre": "R6",
+      "celda_clave": "R9"
+    },
+    {
+      "clave": "SCC-1017",
+      "nombre": "Métodos Numéricos",
+      "semestre_fuente": 4,
+      "celda_nombre": "R12",
+      "celda_clave": "R15"
+    },
+    {
+      "clave": "SCD-1027",
+      "nombre": "Tópicos Avanzados de Programación",
+      "semestre_fuente": 4,
+      "celda_nombre": "R18",
+      "celda_clave": "R21"
+    },
+    {
+      "clave": "AEF-1031",
+      "nombre": "Fundamentos de Bases de Datos",
+      "semestre_fuente": 4,
+      "celda_nombre": "R24",
+      "celda_clave": "R27"
+    },
+    {
+      "clave": "SCD-1022",
+      "nombre": "Simulación",
+      "semestre_fuente": 4,
+      "celda_nombre": "R30",
+      "celda_clave": "R33"
+    },
+    {
+      "clave": "SCD-1018",
+      "nombre": "Principios Eléctricos y Aplicaciones Digitales",
+      "semestre_fuente": 4,
+      "celda_nombre": "R36",
+      "celda_clave": "R39"
+    },
+    {
+      "clave": "SCC-1010",
+      "nombre": "Graficación",
+      "semestre_fuente": 5,
+      "celda_nombre": "W6",
+      "celda_clave": "W9"
+    },
+    {
+      "clave": "AEC-1034",
+      "nombre": "Fundamentos de Telecomunicaciones",
+      "semestre_fuente": 5,
+      "celda_nombre": "W12",
+      "celda_clave": "W15"
+    },
+    {
+      "clave": "AEC-1061",
+      "nombre": "Sistemas Operativos",
+      "semestre_fuente": 5,
+      "celda_nombre": "W18",
+      "celda_clave": "W21"
+    },
+    {
+      "clave": "SCA-1025",
+      "nombre": "Taller de Bases de Datos",
+      "semestre_fuente": 5,
+      "celda_nombre": "W24",
+      "celda_clave": "W27"
+    },
+    {
+      "clave": "SCC-1007",
+      "nombre": "Fundamentos de Ingeniería de Software",
+      "semestre_fuente": 5,
+      "celda_nombre": "W30",
+      "celda_clave": "W33"
+    },
+    {
+      "clave": "SCD-1003",
+      "nombre": "Arquitectura de Computadoras",
+      "semestre_fuente": 5,
+      "celda_nombre": "W36",
+      "celda_clave": "W39"
+    },
+    {
+      "clave": "SCD-1015",
+      "nombre": "Lenguajes y Autómatas I",
+      "semestre_fuente": 6,
+      "celda_nombre": "AB6",
+      "celda_clave": "AB9"
+    },
+    {
+      "clave": "SCD-1021",
+      "nombre": "Redes de Computadoras",
+      "semestre_fuente": 6,
+      "celda_nombre": "AB12",
+      "celda_clave": "AB15"
+    },
+    {
+      "clave": "SCA-1026",
+      "nombre": "Taller de Sistemas Operativos",
+      "semestre_fuente": 6,
+      "celda_nombre": "AB18",
+      "celda_clave": "AB21"
+    },
+    {
+      "clave": "SCB-1001",
+      "nombre": "Administración de Bases de Datos",
+      "semestre_fuente": 6,
+      "celda_nombre": "AB24",
+      "celda_clave": "AB27"
+    },
+    {
+      "clave": "SCD-1011",
+      "nombre": "Ingeniería de Software",
+      "semestre_fuente": 6,
+      "celda_nombre": "AB30",
+      "celda_clave": "AB33"
+    },
+    {
+      "clave": "SCC-1014",
+      "nombre": "Lenguajes de Interfaz",
+      "semestre_fuente": 6,
+      "celda_nombre": "AB36",
+      "celda_clave": "AB39"
+    },
+    {
+      "clave": "SCD-1016",
+      "nombre": "Lenguajes y Autómatas II",
+      "semestre_fuente": 7,
+      "celda_nombre": "AG6",
+      "celda_clave": "AG9"
+    },
+    {
+      "clave": "SCD-1004",
+      "nombre": "Conmutación y Enrutamiento en Redes de Datos",
+      "semestre_fuente": 7,
+      "celda_nombre": "AG12",
+      "celda_clave": "AG15"
+    },
+    {
+      "clave": "ACA-0909",
+      "nombre": "Taller de Investigación I",
+      "semestre_fuente": 7,
+      "celda_nombre": "AG18",
+      "celda_clave": "AG21"
+    },
+    {
+      "clave": "IAC-2201",
+      "nombre": "Programación Móvil",
+      "semestre_fuente": 7,
+      "celda_nombre": "AG24",
+      "celda_clave": "AG27"
+    },
+    {
+      "clave": "SCG-1009",
+      "nombre": "Gestión de Proyectos de Software",
+      "semestre_fuente": 7,
+      "celda_nombre": "AG30",
+      "celda_clave": "AG33"
+    },
+    {
+      "clave": "SCC-1023",
+      "nombre": "Sistemas Programables",
+      "semestre_fuente": 7,
+      "celda_nombre": "AG36",
+      "celda_clave": "AG39"
+    },
+    {
+      "clave": "SCC-1019",
+      "nombre": "Programación Lógica y Funcional",
+      "semestre_fuente": 8,
+      "celda_nombre": "AL6",
+      "celda_clave": "AL9"
+    },
+    {
+      "clave": "SCA-1002",
+      "nombre": "Administración de Redes",
+      "semestre_fuente": 8,
+      "celda_nombre": "AL12",
+      "celda_clave": "AL15"
+    },
+    {
+      "clave": "ACA-0910",
+      "nombre": "Taller de Investigación II",
+      "semestre_fuente": 8,
+      "celda_nombre": "AL18",
+      "celda_clave": "AL21"
+    },
+    {
+      "clave": "IAC-2202",
+      "nombre": "Sistemas Embebidos",
+      "semestre_fuente": 8,
+      "celda_nombre": "AL24",
+      "celda_clave": "AL27"
+    },
+    {
+      "clave": "AEB-1055",
+      "nombre": "Programación Web",
+      "semestre_fuente": 8,
+      "celda_nombre": "AL30",
+      "celda_clave": "AL33"
+    },
+    {
+      "clave": "IAC-2203",
+      "nombre": "Visión Artificial",
+      "semestre_fuente": 8,
+      "celda_nombre": "AL36",
+      "celda_clave": "AL39"
+    },
+    {
+      "clave": "SCC-1012",
+      "nombre": "Inteligencia Artificial",
+      "semestre_fuente": 9,
+      "celda_nombre": "AQ6",
+      "celda_clave": "AQ9"
+    },
+    {
+      "clave": "IAC-2204",
+      "nombre": "Sistemas Artificiales Inteligentes",
+      "semestre_fuente": 9,
+      "celda_nombre": "AQ24",
+      "celda_clave": "AQ27"
+    },
+    {
+      "clave": "IAD-2205",
+      "nombre": "Interacción Hombre-Máquina",
+      "semestre_fuente": 9,
+      "celda_nombre": "AQ30",
+      "celda_clave": "AQ33"
+    },
+    {
+      "clave": "IAC-2206",
+      "nombre": "Introducción a Big Data",
+      "semestre_fuente": 9,
+      "celda_nombre": "AQ36",
+      "celda_clave": "AQ39"
+    }
+  ],
+  "actividades_no_importadas": [
+    {
+      "nombre": "Actividades Extraescolares",
+      "clave": "ACT EXT"
+    },
+    {
+      "nombre": "Tutorias 1",
+      "clave": "TUTORIAS1"
+    },
+    {
+      "nombre": "Tutorias 2",
+      "clave": "TUTORIAS2"
+    },
+    {
+      "nombre": "Actividades Complementarias",
+      "clave": "ACTCOMP"
+    },
+    {
+      "nombre": "Servicio Social",
+      "clave": "SERVSOC"
+    },
+    {
+      "nombre": "Residencia Profesional",
+      "clave": "RSPi001"
+    }
+  ],
+  "exclusiones_usuario": [
+    {
+      "claves": [
+        "CLE-1",
+        "CLE-2",
+        "CLE-3",
+        "CLE-4",
+        "CLE-5"
+      ],
+      "motivo": "Inglés no se tomará en cuenta en las asesorías."
+    }
+  ]
+}
